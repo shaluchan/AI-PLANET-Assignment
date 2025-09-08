@@ -114,6 +114,16 @@ resource "aws_iam_role_policy_attachment" "ecs_exec" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+#fetch ec2 api url
+data "aws_secretsmanager_secret" "ec2" {
+  name = "ec2"
+}
+
+data "aws_secretsmanager_secret_version" "ec2_v" {
+  secret_id = data.aws_secretsmanager_secret.ec2.id
+}
+
+
 resource "aws_iam_policy" "secrets_read" {
   name   = "prefect-secrets-read"
   policy = jsonencode({
@@ -121,10 +131,10 @@ resource "aws_iam_policy" "secrets_read" {
     Statement = [{
       Effect   = "Allow",
       Action   = ["secretsmanager:GetSecretValue"],
-      Resource =[
-            data.aws_secretsmanager_secret.prefect_api_key.arn,
-            "${data.aws_secretsmanager_secret.prefect_api_key.arn}*"
-        ]
+      Resource = [
+        data.aws_secretsmanager_secret.ec2.arn,
+        "${data.aws_secretsmanager_secret.ec2.arn}*"
+      ]
     }]
   })
 }
@@ -134,27 +144,18 @@ resource "aws_iam_role_policy_attachment" "secrets_read_attach" {
   policy_arn = aws_iam_policy.secrets_read.arn
 }
 
-# Secrets Manager
-data "aws_secretsmanager_secret" "prefect_api_key" {
-  name = "prefect_api_key"
-  tags = { Name = "prefect-ecs" }
-}
-
-data "aws_secretsmanager_secret_version" "prefect_api_key_v" {
-  secret_id = data.aws_secretsmanager_secret.prefect_api_key.id
-}
-
-# ECS Task & Service
-
+# CloudWatch Logs
 resource "aws_cloudwatch_log_group" "prefect_worker" {
   name              = "/ecs/dev-worker"
   retention_in_days = 7
-
   tags = {
     Name = "prefect_ecs"
   }
 }
 
+
+
+# ECS Task Definition
 resource "aws_ecs_task_definition" "worker" {
   family                   = "prefect-worker"
   requires_compatibilities = ["FARGATE"]
@@ -169,52 +170,47 @@ resource "aws_ecs_task_definition" "worker" {
       image     = "prefecthq/prefect:2-latest"
       essential = true
       command   = [
-          "prefect", "worker", "start", 
-          "--pool", "ecs-work-pool", 
-          "--name", "dev-worker"
-          ]
-      environment = [
-  {
-    name  = "PREFECT_API_URL"
-    value = "https://api.prefect.cloud/api/accounts/${var.prefect_account_id}/workspaces/${var.prefect_workspace_id}"
-  }
-]
+        "prefect", "worker", "start", 
+        "--pool", "ecs-work-pool", 
+        "--name", "dev-worker"
+      ]
 
-      secrets = [
+      
+      environment = [
         {
-          name      = "PREFECT_API_KEY",
-          valueFrom = data.aws_secretsmanager_secret_version.prefect_api_key_v.arn
+          name  = "PREFECT_API_URL"
+          value = jsondecode(data.aws_secretsmanager_secret_version.ec2_v.secret_string)["PREFECT_API_URL"]
         }
       ]
 
       logConfiguration = {
-      logDriver = "awslogs",
-      options = {
-        awslogs-group         = aws_cloudwatch_log_group.prefect_worker.name,
-        awslogs-region        = var.aws_region,
-        awslogs-stream-prefix = "ecs"
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.prefect_worker.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "ecs"
+        }
       }
-    }
     }
   ])
 }
 
+# Service Discovery
 resource "aws_service_discovery_service" "worker" {
   name = "prefect-worker"
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.ns.id
     dns_records { 
-        type = "A"
-        ttl = 10
-        }
+      type = "A"
+      ttl  = 10
+    }
     routing_policy = "MULTIVALUE"
   }
-  health_check_custom_config { 
-
-   }
+  health_check_custom_config {}
   tags = { Name = "prefect-ecs" }
 }
 
+# ECS Service
 resource "aws_ecs_service" "worker_svc" {
   name            = "prefect-worker-svc"
   cluster         = aws_ecs_cluster.cluster.id
@@ -235,6 +231,7 @@ resource "aws_ecs_service" "worker_svc" {
   tags = { Name = "prefect-ecs" }
 }
 
+# Security Group
 resource "aws_security_group" "prefect_worker" {
   name_prefix = "prefect-worker-"
   vpc_id      = aws_vpc.this.id
