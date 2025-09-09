@@ -32,7 +32,7 @@ Since **Prefect Cloud Free Plan** does not allow ECS workers (pull pools), the s
 
 ### 1. Clone the Repo
 ```bash
-git clone <repo-url>
+git clone https://github.com/shaluchan/AI-PLANET-Assignment.git
 cd AI-PLANET ASSIGNMENT
 ```
 
@@ -55,7 +55,7 @@ cd AI-PLANET ASSIGNMENT
   ```
 
 ### 3.Configure Secrets
- Store EC2 instance public IP in AWS Secrets manager as ec2.
+ Store PREFECT_API_URL in AWS Secrets manager as ec2.
 
 
 ### 4. Terraform Init & Apply
