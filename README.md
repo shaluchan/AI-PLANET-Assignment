@@ -4,7 +4,7 @@
 This project was part of an assignment to deploy a Prefect worker on AWS ECS (Fargate) using Terraform.
 The goal was to create all the required infrastructure, configure secrets, and connect a worker to Prefect Cloud.
 
-NOTE: On the free Prefect Cloud plan,ECS workers(pull pools) are not supported.ONly managed push pools can be used.SO,while the worker cannot stay alive on the free tier,tje rest of the setup (networking,ECS cluster,roles,secrets etc)has been fully implemented.
+NOTE: On the free Prefect Cloud plan,ECS workers(pull pools) are not supported.Only managed push pools can be used.SO,while the worker cannot stay alive on the free tier,the rest of the setup (networking,ECS cluster,roles,secrets etc)has been fully implemented.
 
 ## Infrastructure Setup
 
@@ -97,7 +97,7 @@ prefect_workspace_id = "<your-workspace-id>"
   ```
     Workers are not required for push work pools.
   ```
-![logs][pics/log.png]
+![logs](pics/log.png)
 
 ## Clean-Up
   ```
