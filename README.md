@@ -50,33 +50,33 @@ prefect_workspace_id = "<your-workspace-id>"
 ```
 2. Store the api key in AWS Secret Manager named as 'prefect_api_key'.
 3. configure AWS CLI in your terminal
-   ```
-   aws configure
-   ```
-It will ask
-```
-AWS Access Key ID [None]: <your-access-key-id>
-AWS Secret Access Key [None]: <your-secret-access-key>
-Default region name [None]: us-east-1
-Default output format [None]: json
-```
-4.Create a prefect account on prefect cloud and store the api key in AWS Secret manager as " prefecct_api_key"
-5. Create a workpool named ecs-work-pool in it.
+ ```
+ aws configure
+ ```
+  It will ask
+ ```
+  AWS Access Key ID [None]: <your-access-key-id>
+  AWS Secret Access Key [None]: <your-secret-access-key>
+  Default region name [None]: us-east-1
+  Default output format [None]: json
+  ```
+4.Create a prefect account on prefect cloud and store the api key in AWS Secret manager as " prefect_api_key".
+
 ## Deployment
-1. Clone the repo
+ 1. Clone the repo
    ```
    git clone
    cd AI-PLANET ASSIGNMENT
    ```
-2. Initialize terraform
+ 2. Initialize terraform
    ```
    terraform init
    ```
-3 Review the plan
-```
-terraform plan
-```
-4. Apply changes
+ 3. Review the plan
+   ```
+   terraform plan
+   ```
+ 4. Apply changes
    ```
    terraform apply
    ```
@@ -92,9 +92,9 @@ terraform plan
 - Logs show connection attempts to Prefect Cloud.
 
 ## Clean-Up
-```
-terraform destroy
-```
+  ```
+  terraform destroy
+  ```
 
 
 
