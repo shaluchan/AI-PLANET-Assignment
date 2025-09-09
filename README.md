@@ -85,6 +85,12 @@ This provisions:
 
 ---
 
+## Clean-Up
+  ```
+   terraform destroy
+  ```
+Stop and terminate your ec2 instance .
+
 ## ⚡ Challenges & Learnings
 - **Free Prefect Cloud Limitation:** Pull-based workers (ECS/K8s) aren’t supported on free tier.  
 - **Solution:** Host Prefect Orion on EC2 and connect ECS worker.  
