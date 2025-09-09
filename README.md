@@ -97,7 +97,7 @@ prefect_workspace_id = "<your-workspace-id>"
   ```
     Workers are not required for push work pools.
   ```
-
+![logs][pics/log.png]
 
 ## Clean-Up
   ```
