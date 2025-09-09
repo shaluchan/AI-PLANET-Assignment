@@ -144,7 +144,7 @@ data "aws_secretsmanager_secret_version" "prefect_api_key_v" {
   secret_id = data.aws_secretsmanager_secret.prefect_api_key.id
 }
 
-# ECS Task & Service
+# Cloudwatch logs
 
 resource "aws_cloudwatch_log_group" "prefect_worker" {
   name              = "/ecs/dev-worker"
@@ -154,6 +154,8 @@ resource "aws_cloudwatch_log_group" "prefect_worker" {
     Name = "prefect_ecs"
   }
 }
+
+# ECS Task & Service
 
 resource "aws_ecs_task_definition" "worker" {
   family                   = "prefect-worker"
@@ -214,6 +216,8 @@ resource "aws_service_discovery_service" "worker" {
    }
   tags = { Name = "prefect-ecs" }
 }
+
+#ECS Service
 
 resource "aws_ecs_service" "worker_svc" {
   name            = "prefect-worker-svc"
